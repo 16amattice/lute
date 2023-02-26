@@ -130,10 +130,11 @@ foreach (explode($zws, $s) as $original_term) {
     $i += 1;
 }
 
+echo "Term matches: ------------\n";
 foreach ($termmatches as $t) {
     echo $t['term'] . ' => ' . implode('; ', $t) . "\n";
 }
-
+echo "END Term matches: ------------\n";
 
 function calculate_hides(&$items) {
     foreach($items as &$ti) {
@@ -145,18 +146,21 @@ function calculate_hides(&$items) {
     // die();
     $isWord = function($i) { return $i['wordid'] != null; };
     $checkwords = array_filter($items, $isWord);
-    // echo "checking words ----------\n";
-    // var_dump($checkwords);
-    // echo "------\n";
+    echo "checking words ----------\n";
+    var_dump($checkwords);
+    echo "------\n";
 
     foreach ($checkwords as &$mw) {
         $isContained = function($i) use ($mw) {
             $contained = ($i['pos'] >= $mw['pos']) && ($i['OrderEnd'] <= $mw['OrderEnd']);
-            $equivalent = ($i['pos'] == $mw['pos']) && ($i['OrderEnd'] == $mw['OrderEnd']);
+            $equivalent = ($i['pos'] == $mw['pos']) && ($i['OrderEnd'] == $mw['OrderEnd']) && ($i['wordid'] == $mw['wordid']);
             return $contained && !$equivalent;
         };
 
         $hides = array_filter($items, $isContained);
+        echo "checkword {$mw['text']} has hides:\n";
+        var_dump($hides);
+        echo "end hides\n";
         $mw['hides'] = $hides;
         foreach ($hides as &$hidden) {
             echo "hiding " . $hidden['text'] . "\n";
@@ -164,6 +168,9 @@ function calculate_hides(&$items) {
         }
     }
 
+    echo "AFTER CALC ----------\n";
+    var_dump($items);
+    echo "END AFTER CALC ----------\n";
     return $items;
 }
 
