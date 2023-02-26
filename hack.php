@@ -59,12 +59,28 @@ function pregMatchCapture($matchAll, $pattern, $subject, $offset = 0)
 }
 
 
+function get_count_before($string, $pos): int {
+    $beforesubstr = mb_substr($string, 0, $pos - 1, 'UTF-8');
+    $zws = mb_chr(0x200B);
+    $parts = explode($zws, $beforesubstr);
+    $nonblank = array_filter($parts, fn($s) => mb_strlen($s) > 0);
+    // dump('initial string: ' . $string);
+    // dump('getting count before, initial pos = ' . $pos);
+    // dump($beforesubstr);
+    // dump('all parts:');
+    // dump($parts);
+    // dump($nonblank);
+    return count($nonblank);
+}
+
 # $s = join_nulls(['hi', ' ', 'there', ' ', 'this', ' ', 'is']);
-$s = split_join_nulls(' hola aquí hay un gato ');
+$s = split_join_nulls(' hola aquí hay un gato y hay un perro ');
 # echo $s . "\n";
 
 $words = array_map(fn($s) => split_join_nulls($s), ['aquí', 'hay un']);
 # var_dump($words);
+
+$termmatches = [];
 
 foreach ($words as $w) {
     $zws = mb_chr(0x200B);
@@ -72,14 +88,28 @@ foreach ($words as $w) {
     $subject = $s;
     $allmatches = pregMatchCapture(true, $pattern, $subject, 0);
 
-    $termmatches = [];
     if (count($allmatches) > 0) {
         # echo "in loop\n";
-        # var_dump($allmatches);
-        $termmatches[] = $allmatches[0];
+        echo "===============\n";
+        var_dump($allmatches);
+        var_dump($allmatches[0]);
+        echo "===============\n";
+        foreach ($allmatches[0] as $m) {
+            echo "------------\n";
+            var_dump($m);
+            $result = [
+                'term' => $m[0],
+                'index' => $m[1],
+                'pos'=> get_count_before($subject, $m[1]),
+                'length' => count(explode($zws, $w)),
+            ];
+            echo "------------\n";
+            $termmatches[] = $result;
+        }
     }
     else {
         echo "no match for pattern $pattern \n";
     }
-    var_dump($termmatches);
 }
+
+var_dump($termmatches);
