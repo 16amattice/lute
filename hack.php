@@ -2,15 +2,7 @@
 
 $zws = mb_chr(0x200B);
 
-function split_join_nulls($s) {
-    $zws = mb_chr(0x200B);
-    # $zws = '/';
-    return implode($zws, explode(' ', $s));
-}
 
-
-// Ref https://stackoverflow.com/questions/1725227/preg-match-and-utf-8-in-php
-    
 /**
  * Returns array of matches in same format as preg_match or preg_match_all
  * @param bool   $matchAll If true, execute preg_match_all, otherwise preg_match
@@ -18,6 +10,8 @@ function split_join_nulls($s) {
  * @param string $subject  The input string.
  * @param int    $offset   The place from which to start the search (in bytes).
  * @return array
+ *
+ * Ref https://stackoverflow.com/questions/1725227/preg-match-and-utf-8-in-php
  */
 function pregMatchCapture($matchAll, $pattern, $subject, $offset = 0)
 {
@@ -63,13 +57,6 @@ function get_count_before($string, $pos): int {
     $beforesubstr = mb_substr($string, 0, $pos - 1, 'UTF-8');
     $zws = mb_chr(0x200B);
     $parts = explode($zws, $beforesubstr);
-    // $nonblank = array_filter($parts, fn($s) => mb_strlen($s) > 0);
-    // dump('initial string: ' . $string);
-    // dump('getting count before, initial pos = ' . $pos);
-    // dump($beforesubstr);
-    // dump('all parts:');
-    // dump($parts);
-    // dump($nonblank);
     return count($parts);
 }
 
