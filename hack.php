@@ -73,15 +73,14 @@ function get_count_before($string, $pos): int {
     return count($parts);
 }
 
-// $s = join_nulls(['hi', ' ', 'there', ' ', 'this', ' ', 'is']);
-// $s = '/hola/ /aquí/ /Hay/ /un/ /gato/ /y/ /hay/ /Un/ /perro/.';
-// $s = '/aquí/ /Hay/ /un/ /gato/.';
 $s = '/aquí/';
+$s = '/hola/ /aquí/ /Hay/ /un/ /gato/ /y/ /hay/ /Un/ /perro/.';
+// $s = '/aquí/ /Hay/ /un/ /gato/.';
 $s = str_replace('/', $zws, $s);
 echo str_replace($zws, '/', $s) . "\n";
 
-// $words = [ 'aquí', "hay{$zws} {$zws}un" ];
-$words = [ 'aquí' ];
+$words = [ 'aquí', "hay{$zws} {$zws}un" ];
+// $words = [ 'aquí' ];
 # var_dump($words);
 
 $termmatches = [];
