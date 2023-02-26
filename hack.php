@@ -86,6 +86,27 @@ $words = [ 'aquí' ];
 
 $termmatches = [];
 
+class TextItem {
+    public string $term;
+    public string $text;
+    public int $pos;
+    public int $OrderEnd;
+    public int $length;
+    public ?int $termid;
+    public array $hides = array();
+    public bool $render = true;
+
+    public function OrderEnd(): int {
+        return $this->pos + $this->length - 1;
+    }
+
+    public function toString(): string {
+        $ren = $this->render ? 'true' : 'false';
+        return "{$this->term}; {$this->text}; {$this->pos}; {$this->length}; {$this->termid}; render = {$ren}";
+    }
+}
+
+
 foreach ($words as $w) {
     $zws = mb_chr(0x200B);
     $pattern = '/' . $zws . '('. $w . ')' . $zws . '/ui';
@@ -101,13 +122,12 @@ foreach ($words as $w) {
         foreach ($allmatches[1] as $m) {
             # echo "------------\n";
             # var_dump($m);
-            $result = [
-                'term' => $w,
-                'text' => $m[0],
-                'pos'=> get_count_before($subject, $m[1]),
-                'length' => count(explode($zws, $w)),
-                'wordid' => 42
-            ];
+            $result = new TextItem();
+            $result->term = $w;
+            $result->text = $m[0];
+            $result->pos = get_count_before($subject, $m[1]);
+            $result->length = count(explode($zws, $w));
+            $result->termid = 42;
             # echo "------------\n";
             $termmatches[] = $result;
         }
@@ -119,32 +139,26 @@ foreach ($words as $w) {
 
 $i = 0;
 foreach (explode($zws, $s) as $original_term) {
-    $result = [
-        'term' => $original_term,
-        'text' => $original_term,
-        'pos' => $i,
-        'length' => 1,
-        'wordid' => null
-    ];
+    $result = new TextItem();
+    $result->term = $original_term;
+    $result->text = $original_term;
+    $result->pos = $i;
+    $result->length = 1;
+    $result->termid = null;
     $termmatches[] = $result;
     $i += 1;
 }
 
 echo "Term matches: ------------\n";
 foreach ($termmatches as $t) {
-    echo $t['term'] . ' => ' . implode('; ', $t) . "\n";
+    echo $t->term . ' => ' . $t->toString() . "\n";
 }
 echo "END Term matches: ------------\n";
 
 function calculate_hides(&$items) {
-    foreach($items as &$ti) {
-        $ti['OrderEnd'] = $ti['pos'] + $ti['length'] - 1;
-        $ti['hides'] = array();
-        $ti['Render'] = true;  // Assume keep them all at first.
-    }
     // var_dump($items);
     // die();
-    $isWord = function($i) { return $i['wordid'] != null; };
+    $isWord = function($i) { return $i->termid != null; };
     $checkwords = array_filter($items, $isWord);
     echo "checking words ----------\n";
     var_dump($checkwords);
@@ -152,29 +166,28 @@ function calculate_hides(&$items) {
 
     foreach ($checkwords as &$mw) {
         $isContained = function($i) use ($mw) {
-            $contained = ($i['pos'] >= $mw['pos']) && ($i['OrderEnd'] <= $mw['OrderEnd']);
-            $equivalent = ($i['pos'] == $mw['pos']) && ($i['OrderEnd'] == $mw['OrderEnd']) && ($i['wordid'] == $mw['wordid']);
+            $contained = ($i->pos >= $mw->pos) && ($i->OrderEnd() <= $mw->OrderEnd());
+            $equivalent = ($i->pos == $mw->pos) && ($i->OrderEnd() == $mw->OrderEnd()) && ($i->termid == $mw->termid);
             return $contained && !$equivalent;
         };
 
         $hides = array_filter($items, $isContained);
-        echo "checkword {$mw['text']} has hides:\n";
+        echo "checkword {$mw->text} has hides:\n";
         var_dump($hides);
         echo "end hides\n";
-        $mw['hides'] = $hides;
+        $mw->hides = $hides;
         foreach ($hides as &$hidden) {
-            echo "hiding " . $hidden['text'] . "\n";
-            $hidden['Render'] = false;
+            echo "hiding " . $hidden->text . "\n";
+            $hidden->render = false;
         }
     }
 
-    echo "AFTER CALC ----------\n";
-    var_dump($items);
-    echo "END AFTER CALC ----------\n";
     return $items;
 }
 
 
 $items = calculate_hides($termmatches);
-$si = array_map(fn($i) => implode('; ', [$i['text'], $i['Render']]), $items);
-var_dump($si);
+echo "AFTER CALC ----------\n";
+foreach ($items as $i)
+    echo $i->toString() . "\n";
+echo "END AFTER CALC ----------\n";
