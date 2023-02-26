@@ -85,7 +85,7 @@ $termmatches = [];
 
 foreach ($words as $w) {
     $zws = mb_chr(0x200B);
-    $pattern = '/' . $zws . $w . $zws . '/ui';
+    $pattern = '/' . $zws . '('. $w . ')' . $zws . '/ui';
     $subject = $s;
     $allmatches = pregMatchCapture(true, $pattern, $subject, 0);
 
@@ -95,7 +95,7 @@ foreach ($words as $w) {
         # var_dump($allmatches);
         # var_dump($allmatches[0]);
         # echo "===============\n";
-        foreach ($allmatches[0] as $m) {
+        foreach ($allmatches[1] as $m) {
             # echo "------------\n";
             # var_dump($m);
             $result = [
@@ -118,6 +118,7 @@ $i = 0;
 foreach (explode($zws, $s) as $original_term) {
     $result = [
         'term' => $original_term,
+        'text' => $original_term,
         'pos' => $i,
         'length' => 1,
         'wordid' => null
