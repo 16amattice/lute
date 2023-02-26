@@ -63,22 +63,25 @@ function get_count_before($string, $pos): int {
     $beforesubstr = mb_substr($string, 0, $pos - 1, 'UTF-8');
     $zws = mb_chr(0x200B);
     $parts = explode($zws, $beforesubstr);
-    $nonblank = array_filter($parts, fn($s) => mb_strlen($s) > 0);
+    // $nonblank = array_filter($parts, fn($s) => mb_strlen($s) > 0);
     // dump('initial string: ' . $string);
     // dump('getting count before, initial pos = ' . $pos);
     // dump($beforesubstr);
     // dump('all parts:');
     // dump($parts);
     // dump($nonblank);
-    return count($nonblank);
+    return count($parts);
 }
 
-# $s = join_nulls(['hi', ' ', 'there', ' ', 'this', ' ', 'is']);
-$s = '/hola/ /aquí/ /Hay/ /un/ /gato/ /y/ /hay/ /Un/ /perro/.';
+// $s = join_nulls(['hi', ' ', 'there', ' ', 'this', ' ', 'is']);
+// $s = '/hola/ /aquí/ /Hay/ /un/ /gato/ /y/ /hay/ /Un/ /perro/.';
+// $s = '/aquí/ /Hay/ /un/ /gato/.';
+$s = '/aquí/';
 $s = str_replace('/', $zws, $s);
 echo str_replace($zws, '/', $s) . "\n";
 
-$words = [ 'aquí', "hay{$zws} {$zws}un" ];
+// $words = [ 'aquí', "hay{$zws} {$zws}un" ];
+$words = [ 'aquí' ];
 # var_dump($words);
 
 $termmatches = [];
@@ -131,3 +134,40 @@ foreach ($termmatches as $t) {
     echo $t['term'] . ' => ' . implode('; ', $t) . "\n";
 }
 
+
+function calculate_hides(&$items) {
+    foreach($items as &$ti) {
+        $ti['OrderEnd'] = $ti['pos'] + $ti['length'] - 1;
+        $ti['hides'] = array();
+        $ti['Render'] = true;  // Assume keep them all at first.
+    }
+    // var_dump($items);
+    // die();
+    $isWord = function($i) { return $i['wordid'] != null; };
+    $checkwords = array_filter($items, $isWord);
+    // echo "checking words ----------\n";
+    // var_dump($checkwords);
+    // echo "------\n";
+
+    foreach ($checkwords as &$mw) {
+        $isContained = function($i) use ($mw) {
+            $contained = ($i['pos'] >= $mw['pos']) && ($i['OrderEnd'] <= $mw['OrderEnd']);
+            $equivalent = ($i['pos'] == $mw['pos']) && ($i['OrderEnd'] == $mw['OrderEnd']);
+            return $contained && !$equivalent;
+        };
+
+        $hides = array_filter($items, $isContained);
+        $mw['hides'] = $hides;
+        foreach ($hides as &$hidden) {
+            echo "hiding " . $hidden['text'] . "\n";
+            $hidden['Render'] = false;
+        }
+    }
+
+    return $items;
+}
+
+
+$items = calculate_hides($termmatches);
+$si = array_map(fn($i) => implode('; ', [$i['text'], $i['Render']]), $items);
+var_dump($si);
