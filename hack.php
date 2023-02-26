@@ -74,8 +74,8 @@ function get_count_before($string, $pos): int {
 }
 
 # $s = join_nulls(['hi', ' ', 'there', ' ', 'this', ' ', 'is']);
-$s = split_join_nulls(' hola aquí hay un gato y hay un perro ');
-# echo $s . "\n";
+$s = split_join_nulls(' hola aquí Hay un gato y hay Un perro ');
+echo str_replace($zws, '/', $s) . "\n";
 
 $words = array_map(fn($s) => split_join_nulls($s), ['aquí', 'hay un']);
 # var_dump($words);
@@ -90,26 +90,36 @@ foreach ($words as $w) {
 
     if (count($allmatches) > 0) {
         # echo "in loop\n";
-        echo "===============\n";
-        var_dump($allmatches);
-        var_dump($allmatches[0]);
-        echo "===============\n";
+        # echo "===============\n";
+        # var_dump($allmatches);
+        # var_dump($allmatches[0]);
+        # echo "===============\n";
         foreach ($allmatches[0] as $m) {
-            echo "------------\n";
-            var_dump($m);
+            # echo "------------\n";
+            # var_dump($m);
             $result = [
                 'term' => $m[0],
-                'index' => $m[1],
                 'pos'=> get_count_before($subject, $m[1]),
                 'length' => count(explode($zws, $w)),
             ];
-            echo "------------\n";
+            # echo "------------\n";
             $termmatches[] = $result;
         }
     }
     else {
         echo "no match for pattern $pattern \n";
     }
+}
+
+$i = 0;
+foreach (explode($zws, $s) as $original_term) {
+    $result = [
+        'term' => $original_term,
+        'pos' => $i,
+        'length' => 1
+    ];
+    $termmatches[] = $result;
+    $i += 1;
 }
 
 var_dump($termmatches);
