@@ -30,7 +30,7 @@ function pregMatchCapture($matchAll, $pattern, $subject, $offset = 0)
         $method .= '_all';
     }
 
-    var_dump([$method, $pattern, $subject, $matchInfo, $flag, $offset]);
+    # var_dump([$method, $pattern, $subject, $matchInfo, $flag, $offset]);
     $n = $method($pattern, $subject, $matchInfo, $flag, $offset);
 
     $result = array();
@@ -61,7 +61,7 @@ function pregMatchCapture($matchAll, $pattern, $subject, $offset = 0)
 
 # $s = join_nulls(['hi', ' ', 'there', ' ', 'this', ' ', 'is']);
 $s = split_join_nulls(' hola aquí hay un gato ');
-echo $s . "\n";
+# echo $s . "\n";
 
 $words = array_map(fn($s) => split_join_nulls($s), ['aquí', 'hay un']);
 # var_dump($words);
@@ -70,5 +70,16 @@ foreach ($words as $w) {
     $zws = mb_chr(0x200B);
     $pattern = '/' . $zws . $w . $zws . '/ui';
     $subject = $s;
-    var_dump(pregMatchCapture(true, $pattern, $subject, 0));
+    $allmatches = pregMatchCapture(true, $pattern, $subject, 0);
+
+    $termmatches = [];
+    if (count($allmatches) > 0) {
+        # echo "in loop\n";
+        # var_dump($allmatches);
+        $termmatches[] = $allmatches[0];
+    }
+    else {
+        echo "no match for pattern $pattern \n";
+    }
+    var_dump($termmatches);
 }
