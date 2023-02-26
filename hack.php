@@ -98,9 +98,11 @@ foreach ($words as $w) {
             # echo "------------\n";
             # var_dump($m);
             $result = [
-                'term' => $m[0],
+                'term' => $w,
+                'text' => $m[0],
                 'pos'=> get_count_before($subject, $m[1]),
                 'length' => count(explode($zws, $w)),
+                'wordid' => 42
             ];
             # echo "------------\n";
             $termmatches[] = $result;
@@ -116,10 +118,14 @@ foreach (explode($zws, $s) as $original_term) {
     $result = [
         'term' => $original_term,
         'pos' => $i,
-        'length' => 1
+        'length' => 1,
+        'wordid' => null
     ];
     $termmatches[] = $result;
     $i += 1;
 }
 
-var_dump($termmatches);
+foreach ($termmatches as $t) {
+    echo $t['term'] . ' => ' . implode('; ', $t) . "\n";
+}
+
