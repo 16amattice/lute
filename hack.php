@@ -191,3 +191,27 @@ echo "AFTER CALC ----------\n";
 foreach ($items as $i)
     echo $i->toString() . "\n";
 echo "END AFTER CALC ----------\n";
+
+
+function sort_by_order_and_tokencount($items): array
+{
+    $cmp = function($a, $b) {
+        if ($a->pos != $b->pos) {
+            return ($a->pos > $b->pos) ? 1 : -1;
+        }
+        // Fallback: descending order, by token count.
+        return ($a->length > $b->length) ? -1 : 1;
+    };
+
+    usort($items, $cmp);
+    return $items;
+}
+
+
+$items = array_filter($items, fn($i) => $i->render);
+$items = sort_by_order_and_tokencount($items);
+
+echo "RENDER ----------\n";
+foreach ($items as $i)
+    echo $i->toString() . "\n";
+echo "RENDER ----------\n";
