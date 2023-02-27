@@ -57,6 +57,13 @@ class ReadingFacade {
     }
 
 
+    private function getRenderable($seid, $setext, $terms) {
+        $rc = new RenderableCalculator();
+        $textitems = $rc->main($setext, $seid, $terms);
+        return new RenderableSentence($seid, $textitems);
+    }
+
+
     public function getSentences(Text $text)
     {
         if ($text->getID() == null)
