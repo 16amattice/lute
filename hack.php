@@ -2,11 +2,12 @@
 
 class TextItem {
     public string $term;
+    public ?int $termid;
+
     public string $text;
     public int $pos;
     public int $OrderEnd;
     public int $length;
-    public ?int $termid;
     public array $hides = array();
     public bool $render = true;
 
