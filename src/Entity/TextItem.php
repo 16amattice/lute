@@ -6,6 +6,8 @@ class TextItem
 {
 
     public int $Order;
+    public int $TextID;
+    public int $LangID;
     public string $Text;
     public int $WordCount;
     public int $TokenCount;

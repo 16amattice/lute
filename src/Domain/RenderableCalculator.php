@@ -148,7 +148,7 @@ class RenderableCalculator {
     }
 
 
-    public function main($s, $sentenceID, $words) {
+    public function main(string $s, int $sentenceID, int $textid, int $langid, $words) {
         $candidates = $this->get_all_textitems($s, $words);
         $candidates = $this->calculate_hides($candidates);
         // echo "Term matches: ------------\n";
@@ -163,6 +163,6 @@ class RenderableCalculator {
         // echo "END AFTER CALC ----------\n";
         $renderable = array_filter($candidates, fn($i) => $i->render);
         $items = $this->sort_by_order_and_tokencount($renderable);
-        return array_map(fn($i) => $i->makeTextItem($sentenceID), $items);
+        return array_map(fn($i) => $i->makeTextItem($sentenceID, $textid, $langid), $items);
     }
 }

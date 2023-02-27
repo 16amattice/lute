@@ -57,9 +57,9 @@ class ReadingFacade {
     }
 
 
-    private function getRenderable($seid, $setext, $terms) {
+    private function getRenderable($seid, $setext, $text, $terms) {
         $rc = new RenderableCalculator();
-        $textitems = $rc->main($setext, $seid, $terms);
+        $textitems = $rc->main($setext, $seid, $text->getID(), $text->getLanguage()->getLgID(), $terms);
         return new RenderableSentence($seid, $textitems);
     }
 
@@ -81,7 +81,7 @@ class ReadingFacade {
         $terms = $this->repo->getTermsInText($text);
         $renderableSentences = [];
         foreach ($sentences as $sent) {
-            $renderableSentences[] = $this->getRenderable($sent->SeID, $sent->SeText, $terms);
+            $renderableSentences[] = $this->getRenderable($sent->SeID, $sent->SeText, $text, $terms);
         }
         
         return $renderableSentences;

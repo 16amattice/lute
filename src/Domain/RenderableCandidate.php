@@ -30,9 +30,11 @@ class RenderableCandidate {
         return "{$id}; {$this->text}; {$this->pos}; {$this->length}; render = {$ren}";
     }
 
-    public function makeTextItem(int $seid): TextItem {
+    public function makeTextItem(int $seid, int $textid, int $langid): TextItem {
         $t = new TextItem();
         $t->Order = $this->pos;
+        $t->TextID = $textid;
+        $t->LangID = $langid;
         $t->Text = $this->text;
         $t->WordCount = $this->length;
         $t->TokenCount = $this->length;
