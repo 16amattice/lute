@@ -56,7 +56,30 @@ class ReadingFacade {
         return $sentences;
     }
 
+
     public function getSentences(Text $text)
+    {
+        if ($text->getID() == null)
+            return [];
+
+        if ($text->isArchived()) {
+            $text->setArchived(false);
+            $this->textrepo->save($text, true);
+        }
+
+        // Get all the sentences in the text
+        $sentences = $this->repo->getSentences($text);
+        $terms = $this->termrepo->getTermsInText($text);
+        $renderableSentences = [];
+        foreach ($sentences as $sent) {
+            $renderableSentences[] = $this->getRenderable($sent->SeID, $sent->SeText, $terms);
+        }
+        
+        return $renderableSentences;
+    }
+
+
+    public function getSentences_OLD(Text $text)
     {
         if ($text->getID() == null)
             return [];

@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Text;
+use App\Entity\TextSentence;
 use App\Entity\Term;
 use App\Entity\Sentence;
 use App\Entity\TextItem;
@@ -32,8 +33,33 @@ class ReadingRepository
         $this->lang_repo = $lang_repo;
     }
 
+    public function getSentences(Text $t) {
+        $textid = $t->getID();
+        if ($textid == null)
+            return [];
+
+        $sql = "SELECT
+           SeID, SeText from sentences
+           where SeTxID = $textid
+           order by SeOrder";
+
+        $conn = $this->manager->getConnection();
+        $stmt = $conn->prepare($sql);
+        $res = $stmt->executeQuery();
+        $rows = $res->fetchAllAssociative();
+
+        $ret = [];
+        foreach ($rows as $row) {
+            $s = new TextSentence();
+            $s->SeID = intval($row['SeID']);
+            $s->SeText = $row['SeText'];
+        }
+        return $ret;
+    }
+
+
     public function getTextItems(Text $entity, int $woid = null) {
-        $textid = $textid = $entity->getID();
+        $textid = $entity->getID();
         if ($textid == null)
             return [];
 
