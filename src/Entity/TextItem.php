@@ -12,6 +12,8 @@ class TextItem
 
     public string $TextLC;
     public int $SeID;
+
+    // TODO:remove?  Doesn't seem to be used.
     public int $IsWord;
     public int $TextLength;
 
