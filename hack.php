@@ -70,7 +70,6 @@ $words = [ 'aquí', "hay{$zws} {$zws}un" ];
 // $words = [ 'aquí' ];
 # var_dump($words);
 
-$termmatches = [];
 
 class TextItem {
     public string $term;
@@ -92,6 +91,8 @@ class TextItem {
     }
 }
 
+function get_all_textitems($s, $words) {
+$termmatches = [];
 
 foreach ($words as $w) {
     $zws = mb_chr(0x200B);
@@ -135,6 +136,11 @@ foreach (explode($zws, $s) as $original_term) {
     $i += 1;
 }
 
+return $termmatches;
+}
+
+
+$termmatches = get_all_textitems($s, $words);
 echo "Term matches: ------------\n";
 foreach ($termmatches as $t) {
     echo $t->term . ' => ' . $t->toString() . "\n";
