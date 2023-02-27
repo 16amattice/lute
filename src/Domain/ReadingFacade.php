@@ -76,7 +76,7 @@ class ReadingFacade {
 
         // Get all the sentences in the text
         $sentences = $this->repo->getSentences($text);
-        $terms = $this->termrepo->getTermsInText($text);
+        $terms = $this->repo->getTermsInText($text);
         $renderableSentences = [];
         foreach ($sentences as $sent) {
             $renderableSentences[] = $this->getRenderable($sent->SeID, $sent->SeText, $terms);

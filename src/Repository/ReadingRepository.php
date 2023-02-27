@@ -57,6 +57,9 @@ class ReadingRepository
         return $ret;
     }
 
+    public function getTermsInText(Text $text) {
+        return $this->term_repo->findTermsInText($text);
+    }
 
     public function getTextItems(Text $entity, int $woid = null) {
         $textid = $entity->getID();
