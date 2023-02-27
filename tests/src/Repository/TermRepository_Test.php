@@ -281,9 +281,9 @@ final class TermRepository_Test extends DatabaseTestBase
     }
 
     /**
-     * @group findMatchingSentences
+     * @group findTermsInText
      */
-    public function test_findMatchingSentences() {
+    public function test_findTermsInText() {
         $t = new Text();
         $t->setTitle("Hola.");
         $t->setText("Hola tengo un gato.");
@@ -292,9 +292,12 @@ final class TermRepository_Test extends DatabaseTestBase
 
         $p = new Term($this->spanish, 'perro');
         $g = new Term($this->spanish, 'gato');
+        $this->term_repo->save($p, true);
+        $this->term_repo->save($g, true);
 
-        $terms = $this->term_repo->findMatchingSentences($t);
+        $terms = $this->term_repo->findTermsInText($t);
         $this->assertEquals(1, count($terms), "1 term");
+        $this->assertEquals('gato', $terms[0]->getTextLC(), 'gato found');
     }
 
     // TODO:image_integration_tests Future integration-style tests.

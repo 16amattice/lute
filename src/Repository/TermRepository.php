@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Term;
+use App\Entity\Text;
 use App\Entity\Language;
 
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
@@ -106,6 +107,30 @@ class TermRepository extends ServiceEntityRepository
             fn($r) => $r->getTextLC() != $search && $r->getChildren()->count() == 0
         );
         return array_merge($ret, $remaining);
+    }
+
+
+    public function findTermsInText(Text $t) {
+        // First get all the terms, respecting word boundaries.
+        $sql = "select WoID from words
+        where (
+          select GROUP_CONCAT(SeText order by SeOrder SEPARATOR 0xE2808B)
+          from sentences
+          where setxid = {$t->getID()}
+        ) like concat('%', 0xE2808B, WoTextLC, 0xE2808B, '%')";
+        $conn = $this->getEntityManager()->getConnection();
+        $res = $conn->executeQuery($sql);
+        $wids = [];
+        while ($row = $res->fetchNumeric()) {
+            $wids[] = $row[0];
+        }
+
+        $dql = "SELECT t FROM App\Entity\Term t WHERE t.id in (:tids)";
+        $query = $this->getEntityManager()
+               ->createQuery($dql)
+               ->setParameter('tids', $wids);
+        $raw = $query->getResult();
+        return $raw;
     }
 
 
