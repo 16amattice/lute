@@ -36,6 +36,8 @@ class RenderableCandidate {
 }
 
 
+class RenderableCalculator {
+
 /**
  * Returns array of matches in same format as preg_match or preg_match_all
  * @param bool   $matchAll If true, execute preg_match_all, otherwise preg_match
@@ -46,7 +48,7 @@ class RenderableCandidate {
  *
  * Ref https://stackoverflow.com/questions/1725227/preg-match-and-utf-8-in-php
  */
-function pregMatchCapture($matchAll, $pattern, $subject, $offset = 0)
+private function pregMatchCapture($matchAll, $pattern, $subject, $offset = 0)
 {
     if ($offset != 0) { $offset = strlen(mb_substr($subject, 0, $offset)); }
         
@@ -86,21 +88,21 @@ function pregMatchCapture($matchAll, $pattern, $subject, $offset = 0)
 }
 
 
-function get_count_before($string, $pos): int {
+private function get_count_before($string, $pos): int {
     $beforesubstr = mb_substr($string, 0, $pos - 1, 'UTF-8');
     $zws = mb_chr(0x200B);
     $parts = explode($zws, $beforesubstr);
     return count($parts);
 }
 
-function get_all_textitems($s, $words) {
+private function get_all_textitems($s, $words) {
     $termmatches = [];
 
     foreach ($words as $w) {
         $zws = mb_chr(0x200B);
         $pattern = '/' . $zws . '('. $w->getTextLC() . ')' . $zws . '/ui';
         $subject = $s;
-        $allmatches = pregMatchCapture(true, $pattern, $subject, 0);
+        $allmatches = $this->pregMatchCapture(true, $pattern, $subject, 0);
 
         if (count($allmatches) > 0) {
             # echo "in loop\n";
@@ -114,7 +116,7 @@ function get_all_textitems($s, $words) {
                 $result = new RenderableCandidate();
                 $result->term = $w;
                 $result->text = $m[0];
-                $result->pos = get_count_before($subject, $m[1]);
+                $result->pos = $this->get_count_before($subject, $m[1]);
                 $result->length = count(explode($zws, $w->getTextLC()));
                 # echo "------------\n";
                 $termmatches[] = $result;
@@ -140,7 +142,7 @@ function get_all_textitems($s, $words) {
     return $termmatches;
 }
 
-function calculate_hides(&$items) {
+private function calculate_hides(&$items) {
     $isTerm = function($i) { return $i->term != null; };
     $checkwords = array_filter($items, $isTerm);
     // echo "checking words ----------\n";
@@ -169,7 +171,7 @@ function calculate_hides(&$items) {
 }
 
 
-function sort_by_order_and_tokencount($items): array
+private function sort_by_order_and_tokencount($items): array
 {
     $cmp = function($a, $b) {
         if ($a->pos != $b->pos) {
@@ -184,9 +186,9 @@ function sort_by_order_and_tokencount($items): array
 }
 
 
-function main($s, $words) {
-    $candidates = get_all_textitems($s, $words);
-    $candidates = calculate_hides($candidates);
+public function main($s, $words) {
+    $candidates = $this->get_all_textitems($s, $words);
+    $candidates = $this->calculate_hides($candidates);
 
     // echo "Term matches: ------------\n";
     // foreach ($termmatches as $t) {
@@ -200,17 +202,21 @@ function main($s, $words) {
     // echo "END AFTER CALC ----------\n";
 
     $renderable = array_filter($candidates, fn($i) => $i->render);
-    $items = sort_by_order_and_tokencount($renderable);
+    $items = $this->sort_by_order_and_tokencount($renderable);
 
     return $items;
 }
+
+}
+
 
 $s = '/hola/ /aquí/ /Hay/ /un/ /gato/ /y/ /hay/ /Un/ /perro/.';
 $zws = mb_chr(0x200B);
 $s = str_replace('/', $zws, $s);
 $words = [ new Term(42, 'aquí'), new Term(43, "hay{$zws} {$zws}un") ];
 
-$items = main($s, $words);
+$rc = new RenderableCalculator();
+$items = $rc->main($s, $words);
 echo "RENDER ----------\n";
 foreach ($items as $i)
     echo $i->toString() . "\n";
