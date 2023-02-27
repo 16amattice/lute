@@ -171,11 +171,7 @@ function sort_by_order_and_tokencount($items): array
 }
 
 
-$s = '/hola/ /aquí/ /Hay/ /un/ /gato/ /y/ /hay/ /Un/ /perro/.';
-$zws = mb_chr(0x200B);
-$s = str_replace('/', $zws, $s);
-$words = [ 'aquí', "hay{$zws} {$zws}un" ];
-
+function main($s, $words) {
 $termmatches = get_all_textitems($s, $words);
 $items = calculate_hides($termmatches);
 
@@ -193,6 +189,15 @@ $items = calculate_hides($termmatches);
 $items = array_filter($items, fn($i) => $i->render);
 $items = sort_by_order_and_tokencount($items);
 
+return $items;
+}
+
+$s = '/hola/ /aquí/ /Hay/ /un/ /gato/ /y/ /hay/ /Un/ /perro/.';
+$zws = mb_chr(0x200B);
+$s = str_replace('/', $zws, $s);
+$words = [ 'aquí', "hay{$zws} {$zws}un" ];
+
+$items = main($s, $words);
 echo "RENDER ----------\n";
 foreach ($items as $i)
     echo $i->toString() . "\n";
