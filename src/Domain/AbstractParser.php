@@ -14,11 +14,6 @@ abstract class AbstractParser {
     
     private $conn;
 
-    public function __construct()
-    {
-        $this->conn = Connection::getFromEnvironment();
-    }
-
     public function parse(Text $text) {
         $this->parseText($text);
     }
@@ -43,6 +38,8 @@ abstract class AbstractParser {
     }
  
     private function parseText(Text $text) {
+        $this->conn = Connection::getFromEnvironment();
+
         // dump("parsing text ===============");
         $start = microtime(true);
         $curr = microtime(true);
