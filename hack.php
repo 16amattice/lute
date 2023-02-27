@@ -1,8 +1,17 @@
 <?php
 
+// Fake term-like thing.
+class Term {
+    private $s;
+    private $id;
+    public function __construct($id, $s) { $this->s = $s; $this->id = $id; }
+    public function getTextLC() { return $this->s; }
+    public function getID() { return $this->id; }
+}
+
+
 class TextItem {
-    public string $term;
-    public ?int $termid;
+    public ?Term $term = null;
 
     public string $text;
     public int $pos;
@@ -11,13 +20,20 @@ class TextItem {
     public array $hides = array();
     public bool $render = true;
 
+    public function getTermID(): ?int {
+        if ($this->term == null)
+            return null;
+        return $this->term->getID();
+    }
+    
     public function OrderEnd(): int {
         return $this->pos + $this->length - 1;
     }
 
     public function toString(): string {
         $ren = $this->render ? 'true' : 'false';
-        return "{$this->term}; {$this->text}; {$this->pos}; {$this->length}; {$this->termid}; render = {$ren}";
+        $id = $this->term != null ? $this->term->getID() : '-';
+        return "{$id}; {$this->text}; {$this->pos}; {$this->length}; render = {$ren}";
     }
 }
 
@@ -84,7 +100,7 @@ function get_all_textitems($s, $words) {
 
     foreach ($words as $w) {
         $zws = mb_chr(0x200B);
-        $pattern = '/' . $zws . '('. $w . ')' . $zws . '/ui';
+        $pattern = '/' . $zws . '('. $w->getTextLC() . ')' . $zws . '/ui';
         $subject = $s;
         $allmatches = pregMatchCapture(true, $pattern, $subject, 0);
 
@@ -101,8 +117,7 @@ function get_all_textitems($s, $words) {
                 $result->term = $w;
                 $result->text = $m[0];
                 $result->pos = get_count_before($subject, $m[1]);
-                $result->length = count(explode($zws, $w));
-                $result->termid = 42;
+                $result->length = count(explode($zws, $w->getTextLC()));
                 # echo "------------\n";
                 $termmatches[] = $result;
             }
@@ -116,11 +131,10 @@ function get_all_textitems($s, $words) {
     $i = 0;
     foreach (explode($zws, $s) as $original_term) {
         $result = new TextItem();
-        $result->term = $original_term;
+        $result->term = null;
         $result->text = $original_term;
         $result->pos = $i;
         $result->length = 1;
-        $result->termid = null;
         $termmatches[] = $result;
         $i += 1;
     }
@@ -129,8 +143,8 @@ function get_all_textitems($s, $words) {
 }
 
 function calculate_hides(&$items) {
-    $isWord = function($i) { return $i->termid != null; };
-    $checkwords = array_filter($items, $isWord);
+    $isTerm = function($i) { return $i->term != null; };
+    $checkwords = array_filter($items, $isTerm);
     // echo "checking words ----------\n";
     // var_dump($checkwords);
     // echo "------\n";
@@ -138,7 +152,7 @@ function calculate_hides(&$items) {
     foreach ($checkwords as &$mw) {
         $isContained = function($i) use ($mw) {
             $contained = ($i->pos >= $mw->pos) && ($i->OrderEnd() <= $mw->OrderEnd());
-            $equivalent = ($i->pos == $mw->pos) && ($i->OrderEnd() == $mw->OrderEnd()) && ($i->termid == $mw->termid);
+            $equivalent = ($i->pos == $mw->pos) && ($i->OrderEnd() == $mw->OrderEnd()) && ($i->getTermID() == $mw->getTermID());
             return $contained && !$equivalent;
         };
 
@@ -196,7 +210,7 @@ function main($s, $words) {
 $s = '/hola/ /aquí/ /Hay/ /un/ /gato/ /y/ /hay/ /Un/ /perro/.';
 $zws = mb_chr(0x200B);
 $s = str_replace('/', $zws, $s);
-$words = [ 'aquí', "hay{$zws} {$zws}un" ];
+$words = [ new Term(42, 'aquí'), new Term(43, "hay{$zws} {$zws}un") ];
 
 $items = main($s, $words);
 echo "RENDER ----------\n";
