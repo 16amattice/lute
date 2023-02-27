@@ -74,8 +74,10 @@ class ReadingFacade {
             $this->textrepo->save($text, true);
         }
 
+        dump('getting');
         // Get all the sentences in the text
         $sentences = $this->repo->getSentences($text);
+        dump('got ' . count($sentences) . ' sentences');
         $terms = $this->repo->getTermsInText($text);
         $renderableSentences = [];
         foreach ($sentences as $sent) {

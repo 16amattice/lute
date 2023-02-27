@@ -42,7 +42,7 @@ class ReadingRepository
            SeID, SeText from sentences
            where SeTxID = $textid
            order by SeOrder";
-
+        dump($sql);
         $conn = $this->manager->getConnection();
         $stmt = $conn->prepare($sql);
         $res = $stmt->executeQuery();
@@ -53,6 +53,7 @@ class ReadingRepository
             $s = new TextSentence();
             $s->SeID = intval($row['SeID']);
             $s->SeText = $row['SeText'];
+            $ret[] = $s;
         }
         return $ret;
     }

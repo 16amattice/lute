@@ -64,9 +64,9 @@ class RenderableCalculator {
 
     private function get_all_textitems($s, $words) {
         $termmatches = [];
+        $zws = mb_chr(0x200B);
 
         foreach ($words as $w) {
-            $zws = mb_chr(0x200B);
             $pattern = '/' . $zws . '('. $w->getTextLC() . ')' . $zws . '/ui';
             $subject = $s;
             $allmatches = $this->pregMatchCapture(true, $pattern, $subject, 0);
