@@ -1,5 +1,11 @@
 <?php
 
+require __DIR__.'/vendor/autoload.php';
+
+use App\Entity\Language;
+use App\Entity\Term;
+
+/*
 // Fake term-like thing.
 class Term {
     private $s;
@@ -8,6 +14,7 @@ class Term {
     public function getTextLC() { return $this->s; }
     public function getID() { return $this->id; }
 }
+*/
 
 class RenderableCandidate {
     public ?Term $term = null;
@@ -201,11 +208,12 @@ class RenderableCalculator {
     }
 }
 
+$spanish = Language::makeSpanish();
 
 $s = '/hola/ /aquí/ /Hay/ /un/ /gato/ /y/ /hay/ /Un/ /perro/.';
 $zws = mb_chr(0x200B);
 $s = str_replace('/', $zws, $s);
-$words = [ new Term(42, 'aquí'), new Term(43, "hay{$zws} {$zws}un") ];
+$words = [ new App\Entity\Term($spanish, 'aquí'), new App\Entity\Term($spanish, "hay{$zws} {$zws}un") ];
 
 $rc = new RenderableCalculator();
 $items = $rc->main($s, $words);
