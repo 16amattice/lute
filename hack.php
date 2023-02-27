@@ -140,14 +140,6 @@ function get_all_textitems($s, $words) {
     return $termmatches;
 }
 
-
-$termmatches = get_all_textitems($s, $words);
-echo "Term matches: ------------\n";
-foreach ($termmatches as $t) {
-    echo $t->term . ' => ' . $t->toString() . "\n";
-}
-echo "END Term matches: ------------\n";
-
 function calculate_hides(&$items) {
     // var_dump($items);
     // die();
@@ -179,12 +171,6 @@ function calculate_hides(&$items) {
 }
 
 
-$items = calculate_hides($termmatches);
-echo "AFTER CALC ----------\n";
-foreach ($items as $i)
-    echo $i->toString() . "\n";
-echo "END AFTER CALC ----------\n";
-
 
 function sort_by_order_and_tokencount($items): array
 {
@@ -200,6 +186,20 @@ function sort_by_order_and_tokencount($items): array
     return $items;
 }
 
+
+$termmatches = get_all_textitems($s, $words);
+$items = calculate_hides($termmatches);
+
+echo "Term matches: ------------\n";
+foreach ($termmatches as $t) {
+    echo $t->term . ' => ' . $t->toString() . "\n";
+}
+echo "END Term matches: ------------\n";
+
+echo "AFTER CALC ----------\n";
+foreach ($items as $i)
+    echo $i->toString() . "\n";
+echo "END AFTER CALC ----------\n";
 
 $items = array_filter($items, fn($i) => $i->render);
 $items = sort_by_order_and_tokencount($items);
