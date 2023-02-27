@@ -15,7 +15,6 @@ class TextItem {
 
     public string $text;
     public int $pos;
-    public int $OrderEnd;
     public int $length;
     public array $hides = array();
     public bool $render = true;
