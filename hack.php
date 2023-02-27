@@ -92,51 +92,52 @@ class TextItem {
 }
 
 function get_all_textitems($s, $words) {
-$termmatches = [];
+    $termmatches = [];
 
-foreach ($words as $w) {
-    $zws = mb_chr(0x200B);
-    $pattern = '/' . $zws . '('. $w . ')' . $zws . '/ui';
-    $subject = $s;
-    $allmatches = pregMatchCapture(true, $pattern, $subject, 0);
+    foreach ($words as $w) {
+        $zws = mb_chr(0x200B);
+        $pattern = '/' . $zws . '('. $w . ')' . $zws . '/ui';
+        $subject = $s;
+        $allmatches = pregMatchCapture(true, $pattern, $subject, 0);
 
-    if (count($allmatches) > 0) {
-        # echo "in loop\n";
-        # echo "===============\n";
-        # var_dump($allmatches);
-        # var_dump($allmatches[0]);
-        # echo "===============\n";
-        foreach ($allmatches[1] as $m) {
-            # echo "------------\n";
-            # var_dump($m);
-            $result = new TextItem();
-            $result->term = $w;
-            $result->text = $m[0];
-            $result->pos = get_count_before($subject, $m[1]);
-            $result->length = count(explode($zws, $w));
-            $result->termid = 42;
-            # echo "------------\n";
-            $termmatches[] = $result;
+        if (count($allmatches) > 0) {
+            # echo "in loop\n";
+            # echo "===============\n";
+            # var_dump($allmatches);
+            # var_dump($allmatches[0]);
+            # echo "===============\n";
+            foreach ($allmatches[1] as $m) {
+                # echo "------------\n";
+                # var_dump($m);
+                $result = new TextItem();
+                $result->term = $w;
+                $result->text = $m[0];
+                $result->pos = get_count_before($subject, $m[1]);
+                $result->length = count(explode($zws, $w));
+                $result->termid = 42;
+                # echo "------------\n";
+                $termmatches[] = $result;
+            }
+        }
+        else {
+            echo "no match for pattern $pattern \n";
         }
     }
-    else {
-        echo "no match for pattern $pattern \n";
+
+    // Add originals
+    $i = 0;
+    foreach (explode($zws, $s) as $original_term) {
+        $result = new TextItem();
+        $result->term = $original_term;
+        $result->text = $original_term;
+        $result->pos = $i;
+        $result->length = 1;
+        $result->termid = null;
+        $termmatches[] = $result;
+        $i += 1;
     }
-}
 
-$i = 0;
-foreach (explode($zws, $s) as $original_term) {
-    $result = new TextItem();
-    $result->term = $original_term;
-    $result->text = $original_term;
-    $result->pos = $i;
-    $result->length = 1;
-    $result->termid = null;
-    $termmatches[] = $result;
-    $i += 1;
-}
-
-return $termmatches;
+    return $termmatches;
 }
 
 
