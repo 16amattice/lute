@@ -19,19 +19,19 @@ class TextItem
     public int $IsWord;
     public int $TextLength;
 
-    public ?int $WoID = 0;
-    public ?string $WoText;
-    public ?int $WoStatus;
-    public ?string $WoTranslation;
-    public ?string $WoRomanization;
-    public ?string $ImageSource;
-    public ?string $Tags;
+    public ?int $WoID = null;
+    public ?string $WoText = null;
+    public ?int $WoStatus = null;
+    public ?string $WoTranslation = null;
+    public ?string $WoRomanization = null;
+    public ?string $ImageSource = null;
+    public ?string $Tags = null;
 
-    public ?int $ParentWoID;
-    public ?string $ParentWoTextLC;
-    public ?string $ParentWoTranslation;
-    public ?string $ParentImageSource;
-    public ?string $ParentTags;
+    public ?int $ParentWoID = null;
+    public ?string $ParentWoTextLC = null;
+    public ?string $ParentWoTranslation = null;
+    public ?string $ParentImageSource = null;
+    public ?string $ParentTags = null;
 
 
     private function strToHex($string): string
@@ -89,7 +89,7 @@ class TextItem
             return "textitem";
         }
         $tc = $this->getTermClassname();
-        if ($this->WoID == 0) {
+        if ($this->WoID == null) {
             return "textitem click word status0 {$tc}";
         }
 
