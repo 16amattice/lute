@@ -9,8 +9,7 @@ class Term {
     public function getID() { return $this->id; }
 }
 
-
-class TextItem {
+class RenderableCandidate {
     public ?Term $term = null;
 
     public string $text;
@@ -112,7 +111,7 @@ function get_all_textitems($s, $words) {
             foreach ($allmatches[1] as $m) {
                 # echo "------------\n";
                 # var_dump($m);
-                $result = new TextItem();
+                $result = new RenderableCandidate();
                 $result->term = $w;
                 $result->text = $m[0];
                 $result->pos = get_count_before($subject, $m[1]);
@@ -129,7 +128,7 @@ function get_all_textitems($s, $words) {
     // Add originals
     $i = 0;
     foreach (explode($zws, $s) as $original_term) {
-        $result = new TextItem();
+        $result = new RenderableCandidate();
         $result->term = null;
         $result->text = $original_term;
         $result->pos = $i;
@@ -186,8 +185,8 @@ function sort_by_order_and_tokencount($items): array
 
 
 function main($s, $words) {
-    $termmatches = get_all_textitems($s, $words);
-    $items = calculate_hides($termmatches);
+    $candidates = get_all_textitems($s, $words);
+    $candidates = calculate_hides($candidates);
 
     // echo "Term matches: ------------\n";
     // foreach ($termmatches as $t) {
@@ -200,8 +199,8 @@ function main($s, $words) {
     //     echo $i->toString() . "\n";
     // echo "END AFTER CALC ----------\n";
 
-    $items = array_filter($items, fn($i) => $i->render);
-    $items = sort_by_order_and_tokencount($items);
+    $renderable = array_filter($candidates, fn($i) => $i->render);
+    $items = sort_by_order_and_tokencount($renderable);
 
     return $items;
 }
