@@ -17,7 +17,7 @@ class TextItem
     public int $IsWord;
     public int $TextLength;
 
-    public ?int $WoID;
+    public ?int $WoID = 0;
     public ?string $WoText;
     public ?int $WoStatus;
     public ?string $WoTranslation;
