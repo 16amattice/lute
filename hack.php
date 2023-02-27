@@ -1,6 +1,24 @@
 <?php
 
-$zws = mb_chr(0x200B);
+class TextItem {
+    public string $term;
+    public string $text;
+    public int $pos;
+    public int $OrderEnd;
+    public int $length;
+    public ?int $termid;
+    public array $hides = array();
+    public bool $render = true;
+
+    public function OrderEnd(): int {
+        return $this->pos + $this->length - 1;
+    }
+
+    public function toString(): string {
+        $ren = $this->render ? 'true' : 'false';
+        return "{$this->term}; {$this->text}; {$this->pos}; {$this->length}; {$this->termid}; render = {$ren}";
+    }
+}
 
 
 /**
@@ -60,37 +78,6 @@ function get_count_before($string, $pos): int {
     return count($parts);
 }
 
-$s = '/aquí/';
-$s = '/hola/ /aquí/ /Hay/ /un/ /gato/ /y/ /hay/ /Un/ /perro/.';
-// $s = '/aquí/ /Hay/ /un/ /gato/.';
-$s = str_replace('/', $zws, $s);
-echo str_replace($zws, '/', $s) . "\n";
-
-$words = [ 'aquí', "hay{$zws} {$zws}un" ];
-// $words = [ 'aquí' ];
-# var_dump($words);
-
-
-class TextItem {
-    public string $term;
-    public string $text;
-    public int $pos;
-    public int $OrderEnd;
-    public int $length;
-    public ?int $termid;
-    public array $hides = array();
-    public bool $render = true;
-
-    public function OrderEnd(): int {
-        return $this->pos + $this->length - 1;
-    }
-
-    public function toString(): string {
-        $ren = $this->render ? 'true' : 'false';
-        return "{$this->term}; {$this->text}; {$this->pos}; {$this->length}; {$this->termid}; render = {$ren}";
-    }
-}
-
 function get_all_textitems($s, $words) {
     $termmatches = [];
 
@@ -141,13 +128,11 @@ function get_all_textitems($s, $words) {
 }
 
 function calculate_hides(&$items) {
-    // var_dump($items);
-    // die();
     $isWord = function($i) { return $i->termid != null; };
     $checkwords = array_filter($items, $isWord);
-    echo "checking words ----------\n";
-    var_dump($checkwords);
-    echo "------\n";
+    // echo "checking words ----------\n";
+    // var_dump($checkwords);
+    // echo "------\n";
 
     foreach ($checkwords as &$mw) {
         $isContained = function($i) use ($mw) {
@@ -157,19 +142,18 @@ function calculate_hides(&$items) {
         };
 
         $hides = array_filter($items, $isContained);
-        echo "checkword {$mw->text} has hides:\n";
-        var_dump($hides);
-        echo "end hides\n";
+        // echo "checkword {$mw->text} has hides:\n";
+        // var_dump($hides);
+        // echo "end hides\n";
         $mw->hides = $hides;
         foreach ($hides as &$hidden) {
-            echo "hiding " . $hidden->text . "\n";
+            // echo "hiding " . $hidden->text . "\n";
             $hidden->render = false;
         }
     }
 
     return $items;
 }
-
 
 
 function sort_by_order_and_tokencount($items): array
@@ -187,19 +171,24 @@ function sort_by_order_and_tokencount($items): array
 }
 
 
+$s = '/hola/ /aquí/ /Hay/ /un/ /gato/ /y/ /hay/ /Un/ /perro/.';
+$zws = mb_chr(0x200B);
+$s = str_replace('/', $zws, $s);
+$words = [ 'aquí', "hay{$zws} {$zws}un" ];
+
 $termmatches = get_all_textitems($s, $words);
 $items = calculate_hides($termmatches);
 
-echo "Term matches: ------------\n";
-foreach ($termmatches as $t) {
-    echo $t->term . ' => ' . $t->toString() . "\n";
-}
-echo "END Term matches: ------------\n";
-
-echo "AFTER CALC ----------\n";
-foreach ($items as $i)
-    echo $i->toString() . "\n";
-echo "END AFTER CALC ----------\n";
+// echo "Term matches: ------------\n";
+// foreach ($termmatches as $t) {
+//     echo $t->term . ' => ' . $t->toString() . "\n";
+// }
+// echo "END Term matches: ------------\n";
+// 
+// echo "AFTER CALC ----------\n";
+// foreach ($items as $i)
+//     echo $i->toString() . "\n";
+// echo "END AFTER CALC ----------\n";
 
 $items = array_filter($items, fn($i) => $i->render);
 $items = sort_by_order_and_tokencount($items);
