@@ -172,24 +172,24 @@ function sort_by_order_and_tokencount($items): array
 
 
 function main($s, $words) {
-$termmatches = get_all_textitems($s, $words);
-$items = calculate_hides($termmatches);
+    $termmatches = get_all_textitems($s, $words);
+    $items = calculate_hides($termmatches);
 
-// echo "Term matches: ------------\n";
-// foreach ($termmatches as $t) {
-//     echo $t->term . ' => ' . $t->toString() . "\n";
-// }
-// echo "END Term matches: ------------\n";
-// 
-// echo "AFTER CALC ----------\n";
-// foreach ($items as $i)
-//     echo $i->toString() . "\n";
-// echo "END AFTER CALC ----------\n";
+    // echo "Term matches: ------------\n";
+    // foreach ($termmatches as $t) {
+    //     echo $t->term . ' => ' . $t->toString() . "\n";
+    // }
+    // echo "END Term matches: ------------\n";
+    // 
+    // echo "AFTER CALC ----------\n";
+    // foreach ($items as $i)
+    //     echo $i->toString() . "\n";
+    // echo "END AFTER CALC ----------\n";
 
-$items = array_filter($items, fn($i) => $i->render);
-$items = sort_by_order_and_tokencount($items);
+    $items = array_filter($items, fn($i) => $i->render);
+    $items = sort_by_order_and_tokencount($items);
 
-return $items;
+    return $items;
 }
 
 $s = '/hola/ /aquí/ /Hay/ /un/ /gato/ /y/ /hay/ /Un/ /perro/.';
