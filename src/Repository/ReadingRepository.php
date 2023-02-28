@@ -38,10 +38,13 @@ class ReadingRepository
         if ($textid == null)
             return [];
 
-        $sql = "SELECT
-           SeID, SeText from sentences
-           where SeTxID = $textid
-           order by SeOrder";
+        $sql = "select
+          TokSentenceNumber,
+          CONCAT(0xE2808B, GROUP_CONCAT(TokText order by TokOrder SEPARATOR 0xE2808B), 0xE2808B) as SeText
+          FROM texttokens
+          where TokTxID = $textid
+          group by TokSentenceNumber";
+
         dump($sql);
         $conn = $this->manager->getConnection();
         $stmt = $conn->prepare($sql);
@@ -51,7 +54,7 @@ class ReadingRepository
         $ret = [];
         foreach ($rows as $row) {
             $s = new TextSentence();
-            $s->SeID = intval($row['SeID']);
+            $s->SeID = intval($row['TokSentenceNumber']);
             $s->SeText = $row['SeText'];
             $ret[] = $s;
         }
