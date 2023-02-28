@@ -58,7 +58,8 @@ abstract class AbstractParser {
         $cleanup = [
             "DROP TABLE IF EXISTS temptextitems",
             "DELETE FROM sentences WHERE SeTxID = $id",
-            "DELETE FROM textitems2 WHERE Ti2TxID = $id"
+            "DELETE FROM textitems2 WHERE Ti2TxID = $id",
+            "DELETE FROM texttokens WHERE TokTxID = $id"
         ];
         foreach ($cleanup as $sql) {
             $this->exec_sql($sql);
@@ -75,6 +76,12 @@ abstract class AbstractParser {
 
         $arr = $this->build_insert_array($tokens);
         $trace("built array");
+
+        $chunks = array_chunk($arr, 1000);
+        foreach ($chunks as $chunk) {
+            $this->load_texttokens($id, $chunk);
+        }
+
         $this->load_temptextitems_from_array($arr);
         $trace("loaded temp table");
         $this->import_temptextitems($text);
@@ -87,7 +94,7 @@ abstract class AbstractParser {
         $trace("loaded cache");
 
         // dump($traces);
-        // $this->exec_sql("DROP TABLE IF EXISTS temptextitems");
+        $this->exec_sql("DROP TABLE IF EXISTS temptextitems");
     }
 
 
@@ -99,10 +106,10 @@ abstract class AbstractParser {
         // Make the array row, incrementing $sentence_number as
         // needed.
         $makeentry = function($token) {
-            $wordcount = $token->isWord ? 1 : 0;
+            $isword = $token->isWord ? 1 : 0;
             $s = $token->token;
             $this->ord += 1;
-            $ret = [ $this->sentence_number, $this->ord, intval($wordcount), rtrim($s, "\r") ];
+            $ret = [ $this->sentence_number, $this->ord, $isword, rtrim($s, "\r") ];
 
             // Word ending with \r marks the end of the current
             // sentence.
@@ -116,6 +123,39 @@ abstract class AbstractParser {
 
         // var_dump($arr);
         return $arr;
+    }
+
+    // Insert each record in chunk in a prepared statement,
+    // where chunk record is [ sentence_num, ord, wordcount, word ].
+    private function load_texttokens(int $txid, array $chunk) {
+        $sqlbase = "insert into texttokens (TokTxID, TokSentenceNumber, TokOrder, TokIsWord, TokText) values ";
+        $n = count($chunk);
+        // "+ 1" on the sentence number is a relic of old code
+        // ... sentences in the array were numbered starting at 0.
+        // Can be amended in the future.
+        $valplaceholders = str_repeat("({$txid},? + 1,?,?,?),", $n);
+        $valplaceholders = rtrim($valplaceholders, ',');
+        $parmtypes = str_repeat("iiis", $n);
+
+        // Flatten the records in the chunks.
+        // Ref belyas's solution in https://gist.github.com/SeanCannon/6585889.
+        $prmarray = [];
+        array_map(
+            function($arr) use (&$prmarray) {
+                $prmarray = array_merge($prmarray, $arr);
+            },
+            $chunk
+        );
+
+        $sql = $sqlbase . $valplaceholders;
+        // echo $sql . "\n";
+        // echo $parmtypes . "\n";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param($parmtypes, ...$prmarray);
+        if (!$stmt->execute()) {
+            throw new \Exception($stmt->error);
+        }
     }
 
 
