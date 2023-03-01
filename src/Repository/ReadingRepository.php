@@ -84,10 +84,10 @@ class ReadingRepository
         $ret = [];
         foreach ($rows as $row) {
             $tok = new TextToken();
-            $tok->TokSentenceNumber = intval(row['TokSentenceNumber']);
-            $tok->TokOrder = intval(row['TokOrder']);
-            $tok->TokIsWord = intval(row['TokIsWord']);
-            $tok->TokText = row['TokText'];
+            $tok->TokSentenceNumber = intval($row['TokSentenceNumber']);
+            $tok->TokOrder = intval($row['TokOrder']);
+            $tok->TokIsWord = intval($row['TokIsWord']);
+            $tok->TokText = $row['TokText'];
             $ret[] = $tok;
         }
         return $ret;
