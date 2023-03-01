@@ -106,7 +106,6 @@ class RenderableCalculator {
             $result->length = $tok->TokIsWord;
             $result->isword = $tok->TokIsWord;
             $termmatches[] = $result;
-            $i += 1;
         }
         return $termmatches;
     }
