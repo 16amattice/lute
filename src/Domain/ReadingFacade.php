@@ -57,12 +57,11 @@ class ReadingFacade {
     }
 
 
-    private function getRenderable($seid, $setext, $text, $terms) {
+    private function getRenderable($terms, $tokens) {
         $rc = new RenderableCalculator();
-        $textitems = $rc->main($setext, $seid, $text->getID(), $text->getLanguage()->getLgID(), $terms);
-        return new RenderableSentence($seid, $textitems);
+        $textitems = $rc->main($terms, $tokens);
+        return $textitems;
     }
-
 
     public function getSentences(Text $text)
     {
@@ -79,11 +78,24 @@ class ReadingFacade {
         $sentences = $this->repo->getSentences($text);
         dump('got ' . count($sentences) . ' sentences');
         $terms = $this->repo->getTermsInText($text);
+        $tokens = $this->repo->getTextTokens($text);
+
+        $senums = array_map(fn($tok) => $tok->TokSentenceNumber, $tokens);
+        $usenums = array_unique($senums);
+
+        $lid = $text->getLanguage()->getLgID();
+        $tid = $text->getID();
         $renderableSentences = [];
-        foreach ($sentences as $sent) {
-            $renderableSentences[] = $this->getRenderable($sent->SeID, $sent->SeText, $text, $terms);
+        foreach ($usenums as $senum) {
+            $setokens = array_filter($tokens, fn($tok) => $tok->TokSentenceNumber == $senum);
+            $renderable = $this->getRenderable($terms, $setokens);
+            $textitems = array_map(
+                fn($i) => $i->makeTextItem($senum, $tid, $lid),
+                $renderable
+            );
+            $rs = new RenderableSentence($senum, $textitems);
+            $renderableSentences[] = $rs;
         }
-        
         return $renderableSentences;
     }
 

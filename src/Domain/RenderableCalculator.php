@@ -62,13 +62,15 @@ class RenderableCalculator {
         return count($parts);
     }
 
-    private function get_all_textitems($s, $words) {
+    private function get_all_textitems($words, $texttokens) {
         $termmatches = [];
+
         $zws = mb_chr(0x200B);
+        $toktext = array_map(fn($t) => $t->TokText, $texttokens);
+        $subject = $zws . implode($zws, $toktext) . $zws;
 
         foreach ($words as $w) {
             $pattern = '/' . $zws . '('. $w->getTextLC() . ')' . $zws . '/ui';
-            $subject = $s;
             $allmatches = $this->pregMatchCapture(true, $pattern, $subject, 0);
             
             if (count($allmatches) > 0) {
@@ -85,6 +87,7 @@ class RenderableCalculator {
                     $result->text = $m[0];
                     $result->pos = $this->get_count_before($subject, $m[1]);
                     $result->length = count(explode($zws, $w->getTextLC()));
+                    $result->isword = 1;
                     # echo "------------\n";
                     $termmatches[] = $result;
                 }
@@ -95,13 +98,13 @@ class RenderableCalculator {
         }
         
         // Add originals
-        $i = 0;
-        foreach (explode($zws, $s) as $original_term) {
+        foreach ($texttokens as $tok) {
             $result = new RenderableCandidate();
             $result->term = null;
-            $result->text = $original_term;
-            $result->pos = $i;
-            $result->length = 1;
+            $result->text = $tok->TokText;
+            $result->pos = $tok->TokOrder;
+            $result->length = $tok->TokIsWord;
+            $result->isword = $tok->TokIsWord;
             $termmatches[] = $result;
             $i += 1;
         }
@@ -148,8 +151,8 @@ class RenderableCalculator {
     }
 
 
-    public function main(string $s, int $sentenceID, int $textid, int $langid, $words) {
-        $candidates = $this->get_all_textitems($s, $words);
+    public function main($words, $texttokens) {
+        $candidates = $this->get_all_textitems($words, $texttokens);
         $candidates = $this->calculate_hides($candidates);
         // echo "Term matches: ------------\n";
         // foreach ($termmatches as $t) {
