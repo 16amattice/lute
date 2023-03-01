@@ -11,6 +11,7 @@ class RenderableCandidate {
     public string $text;
     public int $pos;
     public int $length;
+    public int $isword;
     public array $hides = array();
     public bool $render = true;
 
@@ -41,7 +42,7 @@ class RenderableCandidate {
 
         $t->TextLC = mb_strtolower($this->text);
         $t->SeID = $seid;
-        $t->IsWord = 0;  // TODO:remove? not used?
+        $t->IsWord = $this->isword;
         $t->TextLength = mb_strlen($this->text);
 
         if ($this->term == null)

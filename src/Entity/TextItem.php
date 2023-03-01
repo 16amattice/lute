@@ -14,8 +14,6 @@ class TextItem
 
     public string $TextLC;
     public int $SeID;
-
-    // TODO:remove?  Doesn't seem to be used.
     public int $IsWord;
     public int $TextLength;
 
@@ -85,7 +83,7 @@ class TextItem
     }
 
     public function getHtmlClassString(): string {
-        if ($this->WordCount == 0) {
+        if ($this->IsWord == 0) {
             return "textitem";
         }
         $tc = $this->getTermClassname();

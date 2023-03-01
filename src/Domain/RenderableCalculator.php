@@ -166,6 +166,6 @@ class RenderableCalculator {
         // echo "END AFTER CALC ----------\n";
         $renderable = array_filter($candidates, fn($i) => $i->render);
         $items = $this->sort_by_order_and_tokencount($renderable);
-        return array_map(fn($i) => $i->makeTextItem($sentenceID, $textid, $langid), $items);
+        return $items;
     }
 }
