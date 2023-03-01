@@ -130,7 +130,7 @@ class RenderableCalculator {
             $result->term = null;
             $result->text = $tok->TokText;
             $result->pos = $tok->TokOrder;
-            $result->length = $tok->TokIsWord;
+            $result->length = 1;  // Each thing parsed is 1 token!
             $result->isword = $tok->TokIsWord;
             $termmatches[] = $result;
         }
