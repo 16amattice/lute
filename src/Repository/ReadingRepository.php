@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Text;
+use App\DTO\TextToken;
 use App\Entity\TextSentence;
 use App\Entity\Term;
 use App\Entity\Sentence;
@@ -33,7 +34,7 @@ class ReadingRepository
         $this->lang_repo = $lang_repo;
     }
 
-    public function getSentences(Text $t) {
+    public function getSentences(Text $t): array {
         $textid = $t->getID();
         if ($textid == null)
             return [];
@@ -57,6 +58,37 @@ class ReadingRepository
             $s->SeID = intval($row['TokSentenceNumber']);
             $s->SeText = $row['SeText'];
             $ret[] = $s;
+        }
+        return $ret;
+    }
+
+    public function getTextTokens(Text $t): array {
+        $textid = $t->getID();
+        if ($textid == null)
+            return [];
+
+        $sql = "select
+          TokSentenceNumber,
+          TokOrder,
+          TokIsWord,
+          TokText
+          from texttokens
+          where toktxid = $textid
+          order by TokSentenceNumber, TokOrder";
+
+        $conn = $this->manager->getConnection();
+        $stmt = $conn->prepare($sql);
+        $res = $stmt->executeQuery();
+        $rows = $res->fetchAllAssociative();
+
+        $ret = [];
+        foreach ($rows as $row) {
+            $tok = new TextToken();
+            $tok->TokSentenceNumber = intval(row['TokSentenceNumber']);
+            $tok->TokOrder = intval(row['TokOrder']);
+            $tok->TokIsWord = intval(row['TokIsWord']);
+            $tok->TokText = row['TokText'];
+            $ret[] = $tok;
         }
         return $ret;
     }
