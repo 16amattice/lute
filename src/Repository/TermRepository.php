@@ -130,10 +130,24 @@ class TermRepository extends ServiceEntityRepository
         // for this var.
         */
 
-        $sql = "select WoID from words
-        where (
-          select TxText from texts where TxID = {$t->getID()}
-        ) like concat('%', replace(WoTextLC, 0xE2808B, ''), '%')";
+        // A naive query that takes a long time to run!
+        // $sql = "select WoID from words
+        // where (
+        //   select TxText from texts where TxID = {$t->getID()}
+        // ) like concat('%', replace(WoTextLC, 0xE2808B, ''), '%')";
+
+        // A faster query (but still slow:)
+        // Get all exact matches from the tokens, and then
+        // check the text for multi-word matches.
+        $sql = "select distinct WoID from words
+            where wotext in (select TokText from texttokens where toktxid = {$t->getID()})
+          union
+          select WoID from words
+            where WoTokenCount > 1 AND
+            instr(
+              (select TxText from texts where TxID = {$t->getID()}),
+              replace(WoTextLC, 0xE2808B, '')
+            ) > 0";
 
         dump($sql);
         $conn = $this->getEntityManager()->getConnection();
