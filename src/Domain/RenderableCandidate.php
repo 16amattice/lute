@@ -55,9 +55,7 @@ class RenderableCandidate {
         $t->WoTranslation = $term->getTranslation();
         $t->WoRomanization = $term->getRomanization();
 
-        $i = $term->getCurrentImage();
-        if ($i != null)
-            $t->ImageSource = $i->getSource();
+        $t->ImageSource = $term->getCurrentImage();
 
         $t->Tags = null;
         $tags = $term->getTermTags();
@@ -75,10 +73,7 @@ class RenderableCandidate {
         $t->ParentWoID = $p->getID();
         $t->ParentWoTextLC = $p->getTextLC();
         $t->ParentWoTranslation = $p->getTranslation();
-
-        $i = $p->getCurrentImage();
-        if ($i != null)
-            $t->ParentImageSource = $i->getSource();
+        $t->ParentImageSource = $p->getCurrentImage();
 
         $t->ParentTags = null;
         $tags = $p->getTermTags();
