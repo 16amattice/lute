@@ -117,7 +117,7 @@ function showEditFrame(el, extra_args = {}) {
   const ord = 0; // int_attr('data_order');  // TODO:remove
 
   let data = extra_args.textparts ?? [ el.text() ];
-  console.log(`got data = ${data}`);
+  // console.log(`got data = ${data}`);
 
   let extras = Object.entries(extra_args).
       map((p) => `${p[0]}=${encodeURIComponent(p[1])}`).
