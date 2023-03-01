@@ -65,6 +65,10 @@ class RenderableCalculator {
     private function get_all_textitems($words, $texttokens) {
         $termmatches = [];
 
+        $dumpblank = function($s) {};
+        $dumpstring = function($s) { dump($s); };
+        $debugdump = $dumpblank;
+
         // Tokens must be contiguous and in order!
         $cmp = function($a, $b) {
             if ($a->TokOrder != $b->TokOrder) {
@@ -92,8 +96,15 @@ class RenderableCalculator {
         $subject = $zws . implode($zws, $toktext) . $zws;
 
         foreach ($words as $w) {
+            $debugdump = $dumpstring;
+            if ($w->getTextLC() == 'some') {
+                $debugdump = $dumpstring;
+            }
+
             $pattern = '/' . $zws . '('. $w->getTextLC() . ')' . $zws . '/ui';
             $allmatches = $this->pregMatchCapture(true, $pattern, $subject, 0);
+            $debugdump("searching for string {$w->getTextLC()}");
+            $debugdump($allmatches);
             
             if (count($allmatches) > 0) {
                 # echo "in loop\n";

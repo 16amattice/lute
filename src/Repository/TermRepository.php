@@ -111,20 +111,38 @@ class TermRepository extends ServiceEntityRepository
 
 
     public function findTermsInText(Text $t) {
-        // First get all the terms, respecting word boundaries.
+        // First get all the terms, disregarding word boundaries.
+        // I figured it would be fine to return all matches,
+        // (eg, "so" would be returned for a text containing "sound"), as
+        // very short words in a language are likely to be frequently used.
+
+        /*
+        // Old query that respects word boundaries:
         $sql = "select WoID from words
         where (
           select GROUP_CONCAT(SeText order by SeOrder SEPARATOR 0xE2808B)
           from sentences
           where setxid = {$t->getID()}
         ) like concat('%', 0xE2808B, WoTextLC, 0xE2808B, '%')";
+        // This was running into problems with texts longer than 1024 chars,
+        // due to the "group_concat_max_len" setting.
+        // Ref https://stackoverflow.com/questions/1278184/
+        // for this var.
+        */
+
+        $sql = "select WoID from words
+        where (
+          select TxText from texts where TxID = {$t->getID()}
+        ) like concat('%', replace(WoTextLC, 0xE2808B, ''), '%')";
+
+        dump($sql);
         $conn = $this->getEntityManager()->getConnection();
         $res = $conn->executeQuery($sql);
         $wids = [];
         while ($row = $res->fetchNumeric()) {
             $wids[] = $row[0];
         }
-
+        dump($wids);
         $dql = "SELECT t FROM App\Entity\Term t WHERE t.id in (:tids)";
         $query = $this->getEntityManager()
                ->createQuery($dql)
