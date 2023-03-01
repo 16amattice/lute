@@ -65,6 +65,28 @@ class RenderableCalculator {
     private function get_all_textitems($words, $texttokens) {
         $termmatches = [];
 
+        // Tokens must be contiguous and in order!
+        $cmp = function($a, $b) {
+            if ($a->TokOrder != $b->TokOrder) {
+                return ($a->TokOrder > $b->TokOrder) ? 1 : -1;
+            }
+        };
+        usort($texttokens, $cmp);
+        $prevtok = null;
+        foreach($texttokens as $tok) {
+            if ($prevtok != null) {
+                if ($prevtok->TokOrder != ($tok->TokOrder - 1)) {
+                    $mparts = [
+                        $prevtok->TokText, $prevtok->TokOrder,
+                        $tok->TokText, $tok->TokOrder
+                    ];
+                    throw new \Exception("bad token ordering: {implode('; ', $mparts)}");
+                }
+            }
+            $prevtok = $tok;
+        }
+
+        $firstTokOrder = $texttokens[0]->TokOrder;
         $zws = mb_chr(0x200B);
         $toktext = array_map(fn($t) => $t->TokText, $texttokens);
         $subject = $zws . implode($zws, $toktext) . $zws;
@@ -85,16 +107,21 @@ class RenderableCalculator {
                     $result = new RenderableCandidate();
                     $result->term = $w;
                     $result->text = $m[0];
-                    $result->pos = $this->get_count_before($subject, $m[1]);
+
+                    // 1 is subtracted because the sentence has an extra $zws at the start,
+                    // so there is always an empty element at the start of the sentence.
+                    $result->pos = $firstTokOrder + $this->get_count_before($subject, $m[1]) - 1;
                     $result->length = count(explode($zws, $w->getTextLC()));
                     $result->isword = 1;
                     # echo "------------\n";
                     $termmatches[] = $result;
                 }
             }
+            /*
             else {
                 echo "no match for pattern $pattern \n";
             }
+            */
         }
         
         // Add originals
